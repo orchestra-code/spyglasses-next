@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { Detector } from '@spyglasses/sdk';
 import patterns from '@spyglasses/sdk/patterns/agents.json';
 
-const COLLECTOR_ENDPOINT = process.env.SPYGLASSES_COLLECTOR_ENDPOINT || 'https://api.spyglasses.io/v1/collect';
+const COLLECTOR_ENDPOINT = process.env.SPYGLASSES_COLLECTOR_ENDPOINT || 'https://www.spyglasses.io/api/collect';
 const API_KEY = process.env.SPYGLASSES_API_KEY;
 
 export function createSpyglassesMiddleware(config: {
@@ -26,32 +26,31 @@ export function createSpyglassesMiddleware(config: {
 
     const userAgent = request.headers.get('user-agent') || '';
     const result = detector.detect(userAgent);
-
+    
     // Create response early to minimize latency
     const response = NextResponse.next();
 
-    // Add detection headers
-    response.headers.set('x-spyglasses-bot', result.isBot.toString());
-    if (result.agentName) {
-      response.headers.set('x-spyglasses-agent', result.agentName);
-    }
-
-    // Fire and forget collector request
-    if (apiKey) {
+    // Only send to collector if it's bot traffic
+    if (result.isBot && apiKey) {
+      const url = new URL(request.url);
       const payload = {
         url: request.url,
-        method: request.method,
-        userAgent,
+        user_agent: userAgent,
+        ip_address: request.ip || '',
+        request_method: request.method,
+        request_path: url.pathname,
+        request_query: url.search,
         headers: Object.fromEntries(request.headers),
-        ip: request.ip,
-        detectionResult: result
+        response_status: 200,
+        response_time_ms: 0,
+        timestamp: new Date().toISOString()
       };
 
       fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
+          'x-api-key': apiKey
         },
         body: JSON.stringify(payload)
       }).catch(error => {
@@ -66,4 +65,4 @@ export function createSpyglassesMiddleware(config: {
 }
 
 // Default middleware export
-export default createSpyglassesMiddleware({}); 
+export default createSpyglassesMiddleware({});
