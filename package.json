@@ -1,6 +1,6 @@
 {
   "name": "@spyglasses/next",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Spyglasses middleware for Next.js platforms.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -10,9 +10,9 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-		"test": "vitest run",
-		"test:watch": "vitest",
-		"test:coverage": "vitest run --coverage",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "version": "changeset version",
     "release": "npm run build && changeset publish",
     "prepare": "husky"
@@ -33,7 +33,7 @@
   "devDependencies": {
     "@changesets/cli": "^2.28.1",
     "@commitlint/cli": "^19.8.0",
-		"@commitlint/config-conventional": "^19.8.0",
+    "@commitlint/config-conventional": "^19.8.0",
     "@types/node": "^22.14.0",
     "@types/react": "^18.2.0",
     "@vitest/coverage-v8": "^3.1.1",
