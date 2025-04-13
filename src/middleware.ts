@@ -1,6 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { Detector } from '@spyglasses/sdk';
-import patterns from '@spyglasses/sdk/patterns/agents.json';
+import { detect } from '@spyglasses/sdk';
 
 const COLLECTOR_ENDPOINT = process.env.SPYGLASSES_COLLECTOR_ENDPOINT || 'https://www.spyglasses.io/api/collect';
 const API_KEY = process.env.SPYGLASSES_API_KEY;
@@ -10,7 +9,6 @@ export function createSpyglassesMiddleware(config: {
   collectorEndpoint?: string;
   debug?: boolean;
 }) {
-  const detector = new Detector(patterns.patterns);
   const endpoint = config.collectorEndpoint || COLLECTOR_ENDPOINT;
   const apiKey = config.apiKey || API_KEY;
 
@@ -25,7 +23,7 @@ export function createSpyglassesMiddleware(config: {
     }
 
     const userAgent = request.headers.get('user-agent') || '';
-    const result = detector.detect(userAgent);
+    const result = detect(userAgent);
     
     // Create response early to minimize latency
     const response = NextResponse.next();
