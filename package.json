@@ -10,7 +10,9 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "test": "jest",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"test:coverage": "vitest run --coverage",
     "version": "changeset version",
     "release": "npm run build && changeset publish",
     "prepare": "husky"
@@ -25,13 +27,16 @@
     "@spyglasses/sdk": "^0.0.1"
   },
   "peerDependencies": {
-    "next": ">=13.0.0",
+    "next": ">=14.0.0",
     "react": ">=18.0.0"
   },
   "devDependencies": {
     "@changesets/cli": "^2.28.1",
+    "@commitlint/cli": "^19.8.0",
+		"@commitlint/config-conventional": "^19.8.0",
     "@types/node": "^22.14.0",
     "@types/react": "^18.2.0",
+    "@vitest/coverage-v8": "^3.1.1",
     "next": "^14.2.26",
     "react": "^18.2.0",
     "typescript": "5.8.3",
