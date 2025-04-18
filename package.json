@@ -24,7 +24,7 @@
   "author": "Orchestra AI, Inc.",
   "license": "MIT",
   "dependencies": {
-    "@spyglasses/sdk": "^0.0.1"
+    "@spyglasses/sdk": "^0.1.2"
   },
   "peerDependencies": {
     "next": ">=14.0.0",
