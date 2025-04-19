@@ -1,6 +1,6 @@
 {
   "name": "@spyglasses/next",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Spyglasses middleware for Next.js platforms.",
   "type": "module",
   "main": "./dist/index.js",
