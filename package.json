@@ -2,11 +2,16 @@
   "name": "@spyglasses/next",
   "version": "0.1.0",
   "description": "Spyglasses middleware for Next.js platforms.",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "files": [
     "dist"
   ],
+  "exports": {
+    ".": "./dist/index.js",
+    "./types": "./dist/index.d.ts"
+  },
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
@@ -14,7 +19,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "version": "changeset version",
-    "release": "npm run build && changeset publish",
+    "release": "npm run build && npm publish --access public",
     "prepare": "husky"
   },
   "repository": {

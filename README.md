@@ -19,6 +19,8 @@ pnpm add @spyglasses/next
 
 1. Create or update your `middleware.ts` file in your Next.js project root:
 
+### Basic Usage (No Existing Middleware)
+
 ```typescript
 import { createSpyglassesMiddleware } from '@spyglasses/next';
 
@@ -36,13 +38,19 @@ export const config = {
 };
 ```
 
+### With Existing Middleware
+
+If your application already has middleware, you'll need to chain it with Spyglasses. See our [Deployment Guide](./DEPLOYMENT.md#wrapping-existing-middleware) for detailed examples of:
+- Middleware chaining
+- Middleware composition
+- Custom matcher configurations
+- Advanced use cases
+
 2. Add your API key to your environment variables:
 
 ```env
 SPYGLASSES_API_KEY=your_api_key_here
 ```
-
-That's it! Spyglasses will now detect and monitor AI traffic to your site.
 
 ## Configuration
 
@@ -70,13 +78,15 @@ interface SpyglassesConfig {
 
 ### Custom Matcher Configuration
 
-You can customize which routes are monitored by modifying the matcher configuration:
+You can customize which routes are monitored by modifying the matcher configuration. When using with existing middleware, make sure to combine your matchers appropriately:
 
 ```typescript
 export const config = {
   matcher: [
     // Monitor all routes except specific paths
     '/((?!_next|api|static|images|favicon.ico).*)',
+    // Your existing middleware matchers
+    '/protected/:path*',
   ],
 };
 ```
@@ -116,6 +126,10 @@ The middleware:
 - Runs at the edge for minimal performance impact
 - Only sends data for detected bot/AI traffic
 - Uses secure HTTPS for all API communication
+
+## Deployment
+
+For detailed deployment instructions and examples for various hosting platforms, see our [Deployment Guide](./DEPLOYMENT.md).
 
 ## Support
 
