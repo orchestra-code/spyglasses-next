@@ -3,7 +3,6 @@ import { createSpyglassesMiddleware } from '../middleware';
 import { NextRequest, NextResponse } from 'next/server';
 
 // Mock environment variables
-vi.stubEnv('SPYGLASSES_COLLECTOR_ENDPOINT', 'https://default.collector.endpoint');
 vi.stubEnv('SPYGLASSES_API_KEY', 'default-api-key');
 
 // Mock the SDK's detect function
@@ -28,13 +27,12 @@ describe('Spyglasses Middleware', () => {
       expect(response).toBeInstanceOf(NextResponse);
     });
 
-    it('overrides defaults with provided config', async () => {
+    it('uses provided API key and debug settings', async () => {
       const fetchMock = vi.fn().mockResolvedValue(new Response());
       global.fetch = fetchMock;
 
       const middleware = createSpyglassesMiddleware({
         apiKey: 'test-key',
-        collectorEndpoint: 'https://test.endpoint',
         debug: true
       });
 
@@ -45,7 +43,7 @@ describe('Spyglasses Middleware', () => {
       await middleware(request);
 
       expect(fetchMock).toHaveBeenCalledWith(
-        'https://test.endpoint',
+        'https://www.spyglasses.io/api/collect',
         expect.objectContaining({
           headers: expect.objectContaining({
             'x-api-key': 'test-key'
@@ -108,8 +106,7 @@ describe('Spyglasses Middleware', () => {
       global.fetch = fetchMock;
 
       const middleware = createSpyglassesMiddleware({
-        apiKey: 'test-key',
-        collectorEndpoint: 'https://test.endpoint'
+        apiKey: 'test-key'
       });
 
       const request = new NextRequest('https://example.com', {
@@ -119,7 +116,7 @@ describe('Spyglasses Middleware', () => {
       await middleware(request);
 
       expect(fetchMock).toHaveBeenCalledWith(
-        'https://test.endpoint',
+        'https://www.spyglasses.io/api/collect',
         expect.objectContaining({
           method: 'POST',
           headers: expect.objectContaining({

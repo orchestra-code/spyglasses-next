@@ -1,15 +1,12 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { detect } from '@spyglasses/sdk';
+import { SpyglassesConfig, SpyglassesMiddleware } from './types';
 
-const COLLECTOR_ENDPOINT = process.env.SPYGLASSES_COLLECTOR_ENDPOINT || 'https://www.spyglasses.io/api/collect';
+const COLLECTOR_ENDPOINT = 'https://www.spyglasses.io/api/collect';
 const API_KEY = process.env.SPYGLASSES_API_KEY;
 
-export function createSpyglassesMiddleware(config: {
-  apiKey?: string;
-  collectorEndpoint?: string;
-  debug?: boolean;
-}) {
-  const endpoint = config.collectorEndpoint || COLLECTOR_ENDPOINT;
+export function createSpyglassesMiddleware(config: SpyglassesConfig): SpyglassesMiddleware {
+  const endpoint = COLLECTOR_ENDPOINT;
   const apiKey = config.apiKey || API_KEY;
 
   return async function middleware(request: NextRequest) {
