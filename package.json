@@ -9,8 +9,10 @@
     "dist"
   ],
   "exports": {
-    ".": "./dist/index.js",
-    "./types": "./dist/index.d.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
   },
   "scripts": {
     "build": "tsc",
