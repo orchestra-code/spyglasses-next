@@ -61,9 +61,6 @@ interface SpyglassesConfig {
   // Your Spyglasses API key (required)
   apiKey?: string;
   
-  // Override the default collector endpoint
-  collectorEndpoint?: string;
-  
   // Enable debug logging
   debug?: boolean;
 }
@@ -72,7 +69,6 @@ interface SpyglassesConfig {
 ### Environment Variables
 
 - `SPYGLASSES_API_KEY`: Your Spyglasses API key
-- `SPYGLASSES_COLLECTOR_ENDPOINT`: (Optional) Override the default collector endpoint
 
 ## Advanced Usage
 
@@ -133,8 +129,7 @@ For detailed deployment instructions and examples for various hosting platforms,
 
 ## Support
 
-- [Documentation](https://docs.spyglasses.io)
-- [Dashboard](https://app.spyglasses.io)
+- [Documentation](https://www.spyglasses.io/docs)
 - [Issues](https://github.com/orchestra-code/spyglasses-next/issues)
 
 ## License

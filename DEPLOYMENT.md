@@ -101,9 +101,8 @@ async function existingMiddleware(request: NextRequest) {
 
 // Chain them together
 export async function middleware(request: NextRequest) {
-  // Run Spyglasses first
-  const spyglassesResponse = await spyglassesMiddleware(request)
-  if (spyglassesResponse) return spyglassesResponse
+	// Run Spyglasses middleware first
+	await spyglassesMiddleware(request);
 
   // Then run your middleware
   return existingMiddleware(request)
@@ -172,6 +171,8 @@ export const config = {
 Choose the approach that best fits your needs:
 - Use chaining when you want to run middlewares in sequence and potentially stop early
 - Use composition when you want to run middlewares in parallel and combine their results
+
+Not sure which you need? Chaining is the more common pattern, so unless you know you need composition, use chaining.
 
 ## Troubleshooting
 
