@@ -69,8 +69,6 @@ For platforms that inject environment variables at runtime:
 ```typescript:middleware.ts
 export default createSpyglassesMiddleware({
   apiKey: process.env.SPYGLASSES_API_KEY,
-  // Optional: override collector endpoint
-  collectorEndpoint: process.env.SPYGLASSES_COLLECTOR_ENDPOINT,
   // Optional: enable debug logging
   debug: process.env.NODE_ENV === 'development'
 });
