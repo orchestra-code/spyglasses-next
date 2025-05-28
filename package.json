@@ -17,8 +17,8 @@
     "typecheck": "tsc --project tsconfig.typecheck.json",
     "prepublishOnly": "npm run clean && npm run build",
     "version": "changeset version",
-		"release": "npm run build && npm publish --access public",
-		"prepare": "husky"
+    "release": "npm run build && npm publish --access public",
+    "prepare": "husky"
   },
   "keywords": [
     "nextjs",
@@ -34,7 +34,7 @@
   "author": "Spyglasses <hello@spyglasses.io>",
   "repository": {
     "type": "git",
-    "url": "https://github.com/orchestra-code/spyglasses-next"
+    "url": "git+https://github.com/orchestra-code/spyglasses-next.git"
   },
   "license": "MIT",
   "peerDependencies": {
