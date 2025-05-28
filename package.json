@@ -1,6 +1,6 @@
 {
   "name": "@spyglasses/next",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "AI bot detection and blocking middleware for Next.js applications",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
