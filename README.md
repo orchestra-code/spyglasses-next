@@ -3,7 +3,15 @@
 [![npm version](https://badge.fury.io/js/@spyglasses%2Fnext.svg)](https://www.npmjs.com/package/@spyglasses/next)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Detect and monitor AI agents, bots, and scrapers visiting your Next.js application.
+A middleware for Next.js that detects and optionally blocks AI bots and trackers, while also tracking human visitors coming from AI platforms like ChatGPT, Claude, and Perplexity.
+
+## Key Features
+
+- **High Performance:** Uses build-time pattern loading for optimal performance in serverless environments
+- **Bot Detection:** Identifies and can block AI crawlers, model trainers, and other bots
+- **AI Referrer Tracking:** Tracks human visitors coming from AI platforms
+- **Customizable Rules:** Configure which bots to block or allow with fine-grained control
+- **Zero Runtime Dependencies:** All patterns are loaded at build time for minimal runtime overhead
 
 ## Installation
 
@@ -17,120 +25,67 @@ pnpm add @spyglasses/next
 
 ## Quick Start
 
-1. Create or update your `middleware.ts` file in your Next.js project root:
-
-### Basic Usage (No Existing Middleware)
+1. Create a `middleware.ts` file in the root of your Next.js project:
 
 ```typescript
+// middleware.ts
 import { createSpyglassesMiddleware } from '@spyglasses/next';
 
-// Export the middleware
 export default createSpyglassesMiddleware({
-  apiKey: process.env.SPYGLASSES_API_KEY
+  apiKey: process.env.SPYGLASSES_API_KEY,
+  debug: process.env.NODE_ENV !== 'production'
 });
 
-// Configure matcher
 export const config = {
-  matcher: [
-    // Skip all internal paths (_next)
-    '/((?!_next|api|static|.*\\..*).*)',
-  ],
+  matcher: ['/((?!_next|api|favicon.ico|.*\\.(jpg|jpeg|gif|png|svg|ico|css|js)).*)'],
 };
 ```
 
-### With Existing Middleware
+2. Add your API key to your environment variables (`.env.local`):
 
-If your application already has middleware, you'll need to chain it with Spyglasses. See our [Deployment Guide](./DEPLOYMENT.md#wrapping-existing-middleware) for detailed examples of:
-- Middleware chaining
-- Middleware composition
-- Custom matcher configurations
-- Advanced use cases
-
-2. Add your API key to your environment variables:
-
-```env
+```
 SPYGLASSES_API_KEY=your_api_key_here
 ```
 
-## Configuration
+That's it! The middleware will now detect and log AI bots and referrers visiting your site.
 
-The middleware accepts the following options:
+## Usage Examples
 
-```typescript
-interface SpyglassesConfig {
-  // Your Spyglasses API key (required)
-  apiKey?: string;
-  
-  // Enable debug logging
-  debug?: boolean;
-}
-```
+We provide several example implementations to help you integrate Spyglasses into your Next.js application:
 
-### Environment Variables
+- **[Basic Example](./examples/basic)** - Simple integration with minimal configuration
+- **[Build-time Pattern Loading](./examples/build-time-loading)** - Optimized for serverless environments
+- **[Blocking Configuration](./examples/with-blocking)** - Block AI model trainers and custom bot patterns
+- **[Middleware Chaining](./examples/middleware-chaining)** - Integrate with existing middleware
+- **[Runtime API Loading](./examples/runtime-api)** - Alternative approach (not recommended for serverless)
 
-- `SPYGLASSES_API_KEY`: Your Spyglasses API key
+See the [examples directory](./examples) for more details.
 
-## Advanced Usage
+## Deployment Guides
 
-### Custom Matcher Configuration
+For platform-specific deployment instructions and advanced usage patterns, see the [Deployment Guide](./DEPLOYMENT.md).
 
-You can customize which routes are monitored by modifying the matcher configuration. When using with existing middleware, make sure to combine your matchers appropriately:
+Topics covered in the deployment guide:
+- Platform-specific deployment (Vercel, Netlify, AWS Amplify, Docker)
+- Build-time pattern loading configuration
+- Middleware chaining with existing middleware
+- Using with Edge Functions
+- Troubleshooting common issues
 
-```typescript
-export const config = {
-  matcher: [
-    // Monitor all routes except specific paths
-    '/((?!_next|api|static|images|favicon.ico).*)',
-    // Your existing middleware matchers
-    '/protected/:path*',
-  ],
-};
-```
+## Configuration Options
 
-### Debug Mode
+The middleware accepts the following configuration options:
 
-Enable debug mode to log any collection errors:
-
-```typescript
-export default createSpyglassesMiddleware({
-  apiKey: process.env.SPYGLASSES_API_KEY,
-  debug: process.env.NODE_ENV === 'development'
-});
-```
-
-## Development
-
-To run the middleware in development:
-
-1. Set up your environment variables:
-```bash
-cp .env.example .env.local
-```
-
-2. Add your API key to `.env.local`
-
-3. Start your Next.js application as normal:
-```bash
-npm run dev
-```
-
-## Security
-
-The middleware:
-- Only monitors incoming requests
-- Doesn't modify your application's responses
-- Runs at the edge for minimal performance impact
-- Only sends data for detected bot/AI traffic
-- Uses secure HTTPS for all API communication
-
-## Deployment
-
-For detailed deployment instructions and examples for various hosting platforms, see our [Deployment Guide](./DEPLOYMENT.md).
-
-## Support
-
-- [Documentation](https://www.spyglasses.io/docs)
-- [Issues](https://github.com/orchestra-code/spyglasses-next/issues)
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `apiKey` | `string` | `process.env.SPYGLASSES_API_KEY` | Your Spyglasses API key |
+| `debug` | `boolean` | `false` | Enable debug logging |
+| `patterns` | `BotPattern[]` | Built-in patterns | Custom bot patterns to use (loaded at build time) |
+| `aiReferrers` | `AiReferrerInfo[]` | Built-in referrers | Custom AI referrer patterns to use (loaded at build time) |
+| `blockAiModelTrainers` | `boolean` | `false` | Whether to block AI model trainers (GPTBot, Claude, etc.) |
+| `customBlocks` | `string[]` | `[]` | Custom patterns to block |
+| `customAllows` | `string[]` | `[]` | Custom patterns to allow (overrides blocks) |
+| `excludePaths` | `(string \| RegExp)[]` | Default exclusions | Paths to exclude from monitoring |
 
 ## License
 
