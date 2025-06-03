@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { Spyglasses } from '@spyglasses/sdk';
+import { ApiPatternResponse, Spyglasses } from '@spyglasses/sdk';
 import { SpyglassesConfig, SpyglassesMiddleware } from './types';
 
 const COLLECTOR_ENDPOINT = 'https://www.spyglasses.io/api/collect';
@@ -7,6 +7,7 @@ const API_KEY = process.env.SPYGLASSES_API_KEY;
 
 // Module-level instance cache
 let spyglassesInstance: Spyglasses | null = null;
+let patternSyncPromise: Promise<ApiPatternResponse | string> | null = null;
 
 /**
  * Get or create a Spyglasses instance with the given configuration
@@ -20,24 +21,41 @@ function getSpyglassesInstance(config: SpyglassesConfig): Spyglasses {
       blockAiModelTrainers: config.blockAiModelTrainers || false,
       customBlocks: config.customBlocks || [],
       customAllows: config.customAllows || [],
-      collectEndpoint: COLLECTOR_ENDPOINT,
-      autoSync: false, // Disable auto-sync for serverless environments
+      collectEndpoint: COLLECTOR_ENDPOINT
     });
-    
-    // Use build-time patterns if provided
-    if (config.patterns && Array.isArray(config.patterns)) {
-      // Override default patterns with build-time patterns
-      spyglassesInstance['patterns'] = config.patterns;
-    }
-    
-    // Use build-time AI referrers if provided
-    if (config.aiReferrers && Array.isArray(config.aiReferrers)) {
-      // Override default AI referrers with build-time referrers
-      spyglassesInstance['aiReferrers'] = config.aiReferrers;
-    }
   }
   
   return spyglassesInstance;
+}
+
+/**
+ * Sync and cache patterns
+ */
+async function syncPatterns(spyglasses: Spyglasses, debug: boolean = false): Promise<void> {
+  // If there's already a sync in progress, wait for it
+  if (patternSyncPromise) {
+    await patternSyncPromise;
+    return;
+  }
+
+  // If we have an API key, try to sync patterns
+  if (spyglasses.hasApiKey()) {
+    patternSyncPromise = spyglasses.syncPatterns();
+    
+    try {
+      const result = await patternSyncPromise;
+      if (debug && typeof result === 'string') {
+        console.warn('Spyglasses: Pattern sync warning:', result);
+      }
+    } catch (error) {
+      if (debug) {
+        console.error('Spyglasses: Pattern sync failed, using defaults:', error);
+      }
+    } finally {
+      // Clear the promise so future calls can sync again
+      patternSyncPromise = null;
+    }
+  }
 }
 
 // Determine if a path should be excluded
@@ -72,6 +90,14 @@ export function createSpyglassesMiddleware(config: SpyglassesConfig): Spyglasses
   // Create or get a Spyglasses instance
   const spyglasses = getSpyglassesInstance(config);
   const excludePaths = config.excludePaths || [];
+  
+  // Always try to sync patterns if we have an API key (using Next.js caching)
+  if (spyglasses.hasApiKey()) {
+    // Start pattern sync in background - don't await to avoid blocking
+    syncPatterns(spyglasses, config.debug).catch(() => {
+      // Ignore errors - will use default patterns
+    });
+  }
   
   return async function middleware(request: NextRequest) {
     const url = new URL(request.url);

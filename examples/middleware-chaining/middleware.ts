@@ -7,44 +7,16 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { createSpyglassesMiddleware } from '@spyglasses/next';
-import type { BotPattern, AiReferrerInfo } from '@spyglasses/sdk';
-
-// Parse patterns from environment variables (similar to other examples)
-let patterns: BotPattern[] | undefined;
-let aiReferrers: AiReferrerInfo[] | undefined;
-let blockAiModelTrainers = false;
-
-try {
-  if (process.env.SPYGLASSES_PATTERNS) {
-    patterns = JSON.parse(process.env.SPYGLASSES_PATTERNS);
-  }
-  
-  if (process.env.SPYGLASSES_AI_REFERRERS) {
-    aiReferrers = JSON.parse(process.env.SPYGLASSES_AI_REFERRERS);
-  }
-  
-  if (process.env.SPYGLASSES_BLOCK_AI_MODEL_TRAINERS) {
-    blockAiModelTrainers = process.env.SPYGLASSES_BLOCK_AI_MODEL_TRAINERS === 'true';
-  }
-} catch (error) {
-  console.error('Failed to parse Spyglasses configuration:', error);
-}
 
 /**
  * Create the Spyglasses middleware instance
  */
 const spyglassesMiddleware = createSpyglassesMiddleware({
+  // Get API key from environment variables
   apiKey: process.env.SPYGLASSES_API_KEY,
-  debug: process.env.NODE_ENV !== 'production',
-  patterns,
-  aiReferrers,
-  blockAiModelTrainers,
-  excludePaths: [
-    '/admin',
-    '/api',
-    '/_next',
-    /\.(jpg|png|gif|svg|ico|css|js)$/
-  ]
+  
+  // Enable debug logging in development
+  debug: process.env.NODE_ENV !== 'production'
 });
 
 /**
@@ -89,6 +61,7 @@ export async function middleware(request: NextRequest) {
 
 /**
  * Configure Next.js middleware matcher
+ * You likely won't need to change this when integrating Spyglasses
  */
 export const config = {
   matcher: [

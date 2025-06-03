@@ -1,4 +1,4 @@
-# Deployment Guides
+# Deployment Guide
 
 This guide provides platform-specific deployment instructions and advanced usage patterns for the Spyglasses Next.js middleware.
 
@@ -23,12 +23,24 @@ pnpm add @spyglasses/next
 
 2. Add your API key in the Vercel dashboard:
    - Go to Project Settings > Environment Variables
-   - Add `SPYGLASSES_API_KEY`
+   - Add `SPYGLASSES_API_KEY` with your API key
+   - Optionally add `SPYGLASSES_CACHE_TTL` (defaults to 86400 seconds / 24 hours)
    - Deploy to apply changes
 
-3. For optimal performance with build-time pattern loading:
-   - Configure your `next.config.js` to fetch patterns at build time
-   - See the [Build-Time Pattern Loading](#build-time-pattern-loading) section below
+3. Create your middleware:
+```typescript
+// middleware.ts
+import { createSpyglassesMiddleware } from '@spyglasses/next';
+
+export default createSpyglassesMiddleware({
+  apiKey: process.env.SPYGLASSES_API_KEY,
+  debug: process.env.NODE_ENV !== 'production'
+});
+
+export const config = {
+  matcher: ['/((?!_next|api|favicon.ico|.*\\.(jpg|jpeg|gif|png|svg|ico|css|js)).*)'],
+};
+```
 
 ### Netlify
 
@@ -39,10 +51,11 @@ npm install @spyglasses/next
 
 2. Add your API key in the Netlify dashboard:
    - Go to Site Settings > Build & Deploy > Environment
-   - Add `SPYGLASSES_API_KEY`
+   - Add `SPYGLASSES_API_KEY` with your API key
+   - Optionally add `SPYGLASSES_CACHE_TTL`
    - Trigger a new deploy
 
-3. For optimal performance, add the build-time pattern loading in your `next.config.js`
+3. The middleware will automatically handle pattern caching using Next.js built-in mechanisms.
 
 ### AWS Amplify
 
@@ -53,14 +66,16 @@ npm install @spyglasses/next
 
 2. Add your API key:
    - Go to App Settings > Environment Variables
-   - Add `SPYGLASSES_API_KEY`
+   - Add `SPYGLASSES_API_KEY` with your API key
+   - Optionally add `SPYGLASSES_CACHE_TTL`
    - Redeploy your application
 
 ### Docker
 
-1. Add to your Dockerfile:
+1. Add environment variables to your Dockerfile:
 ```dockerfile
 ENV SPYGLASSES_API_KEY=your_api_key_here
+ENV SPYGLASSES_CACHE_TTL=86400
 ```
 
 Or use docker-compose:
@@ -69,108 +84,57 @@ services:
   web:
     environment:
       - SPYGLASSES_API_KEY=your_api_key_here
+      - SPYGLASSES_CACHE_TTL=86400
 ```
 
-## Build-Time Pattern Loading
+## Environment Variables
 
-For optimal performance in serverless environments, load bot patterns and AI referrers at build time:
-
-```javascript
-// next.config.js
-async function fetchPatternsAtBuildTime() {
-  try {
-    const apiKey = process.env.SPYGLASSES_API_KEY;
-    
-    if (!apiKey) {
-      console.warn('SPYGLASSES_API_KEY not found in environment, using default patterns');
-      return { patterns: null, aiReferrers: null };
-    }
-    
-    console.log('Fetching Spyglasses patterns at build time...');
-    
-    const response = await fetch('https://www.spyglasses.io/api/patterns', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey
-      }
-    });
-    
-    if (!response.ok) {
-      throw new Error(`Failed to fetch patterns: ${response.status} ${response.statusText}`);
-    }
-    
-    const data = await response.json();
-    
-    console.log(`Successfully fetched ${data.patterns.length} bot patterns and ${data.aiReferrers.length} AI referrers`);
-    
-    return {
-      patterns: data.patterns,
-      aiReferrers: data.aiReferrers
-    };
-  } catch (error) {
-    console.error('Error fetching Spyglasses patterns:', error);
-    return { patterns: null, aiReferrers: null };
-  }
-}
-
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  // Your existing Next.js config...
-  
-  // This function runs at build time
-  async rewrites() {
-    // Fetch patterns at build time
-    const { patterns, aiReferrers } = await fetchPatternsAtBuildTime();
-    
-    // Set environment variables for the middleware
-    if (patterns) {
-      process.env.SPYGLASSES_PATTERNS = JSON.stringify(patterns);
-    }
-    
-    if (aiReferrers) {
-      process.env.SPYGLASSES_AI_REFERRERS = JSON.stringify(aiReferrers);
-    }
-    
-    return {
-      beforeFiles: []
-    };
-  }
-};
-
-module.exports = nextConfig;
-```
+| Variable | Description | Default | Required |
+|----------|-------------|---------|----------|
+| `SPYGLASSES_API_KEY` | Your Spyglasses API key | None | Yes |
+| `SPYGLASSES_CACHE_TTL` | Cache duration in seconds | `86400` (24 hours) | No |
 
 ## Blocking Configuration
 
 You can configure Spyglasses to block specific bots or AI model trainers:
 
-```javascript
-// next.config.js
-module.exports = {
-  env: {
-    // Block AI model trainers (GPTBot, Claude-Bot, etc.)
-    SPYGLASSES_BLOCK_AI_MODEL_TRAINERS: 'true',
-    
-    // Block specific categories, subcategories, or patterns
-    SPYGLASSES_CUSTOM_BLOCKS: JSON.stringify([
-      'category:Scraper',                  // Block all scrapers
-      'subcategory:AI Agent:AI Assistants' // Block all AI assistants
-    ]),
-    
-    // Allow specific patterns (overrides blocks)
-    SPYGLASSES_CUSTOM_ALLOWS: JSON.stringify([
-      'pattern:Googlebot'                  // Always allow Googlebot
-    ])
-  }
-};
+```typescript
+// middleware.ts
+import { createSpyglassesMiddleware } from '@spyglasses/next';
+
+export default createSpyglassesMiddleware({
+  apiKey: process.env.SPYGLASSES_API_KEY,
+  
+  // Block AI model trainers (GPTBot, Claude-Bot, etc.)
+  blockAiModelTrainers: true,
+  
+  // Block specific categories, subcategories, or patterns
+  customBlocks: [
+    'category:Scraper',                    // Block all scrapers
+    'subcategory:AI Agent',               // Block all AI agents
+    'pattern:SomeSpecificBot'             // Block specific bot
+  ],
+  
+  // Allow specific patterns (overrides blocks)
+  customAllows: [
+    'pattern:Googlebot',                  // Always allow Googlebot
+    'pattern:Bingbot'                     // Always allow Bingbot
+  ],
+  
+  // Exclude specific paths from monitoring
+  excludePaths: [
+    '/health',                            // Health checks
+    '/api/webhooks',                      // Webhook endpoints
+    /^\/admin/                           // Admin paths (regex)
+  ]
+});
 ```
 
 ## Integrating with Existing Middleware
 
-Most Next.js applications already have custom middleware. Here are two ways to integrate Spyglasses with your existing middleware:
+Most Next.js applications already have custom middleware. Here's how to integrate Spyglasses:
 
-### 1. Middleware Chaining (Recommended)
+### Middleware Chaining (Recommended)
 
 Run multiple middleware functions in sequence:
 
@@ -211,7 +175,7 @@ export async function middleware(request: NextRequest) {
 // Configure matchers for both middlewares
 export const config = {
   matcher: [
-    // Spyglasses matchers
+    // Standard Spyglasses matcher
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(jpg|jpeg|gif|png|svg|ico|css|js)).*)',
     // Your custom matchers
     '/protected/:path*',
@@ -219,9 +183,9 @@ export const config = {
 }
 ```
 
-### 2. Middleware Composition
+### Conditional Middleware
 
-Run middleware functions in parallel and combine their results:
+Run different middleware based on path:
 
 ```typescript
 // middleware.ts
@@ -229,57 +193,31 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { createSpyglassesMiddleware } from '@spyglasses/next'
 
-// Create the Spyglasses middleware
 const spyglassesMiddleware = createSpyglassesMiddleware({
   apiKey: process.env.SPYGLASSES_API_KEY,
   blockAiModelTrainers: true
 });
 
-// Your existing middleware
-async function existingMiddleware(request: NextRequest) {
-  // Your custom logic here
-  return NextResponse.next()
-}
-
-// Compose middlewares
 export async function middleware(request: NextRequest) {
-  // Run both middlewares in parallel
-  const [spyglassesResponse, existingResponse] = await Promise.all([
-    spyglassesMiddleware(request),
-    existingMiddleware(request),
-  ])
-
-  // Handle responses based on your needs
-  if (spyglassesResponse.status === 403) {
-    return spyglassesResponse // Block bot traffic
+  const { pathname } = request.nextUrl;
+  
+  // Only run Spyglasses on public pages
+  if (!pathname.startsWith('/api') && !pathname.startsWith('/admin')) {
+    return spyglassesMiddleware(request);
   }
-
-  if (existingResponse.status === 401) {
-    return existingResponse // Handle unauthorized access
-  }
-
-  // Continue with the request
-  return NextResponse.next()
+  
+  // Run your custom middleware for other paths
+  return NextResponse.next();
 }
 
-// Configure matchers
 export const config = {
-  matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(jpg|jpeg|gif|png|svg|ico|css|js)).*)',
-    '/protected/:path*',
-  ],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)',]
 }
 ```
 
-Choose the approach that best fits your needs:
-- Use chaining when you want to run middlewares in sequence and potentially stop early
-- Use composition when you want to run middlewares in parallel and combine their results
-
-Not sure which you need? Chaining is the more common pattern, so unless you know you need composition, use chaining.
-
 ## Using with Edge Functions
 
-If you're deploying to Edge Functions (Vercel Edge, Cloudflare Workers), the middleware is fully compatible:
+The middleware is fully compatible with Edge Functions:
 
 ```typescript
 // middleware.ts
@@ -288,9 +226,7 @@ import { createSpyglassesMiddleware } from '@spyglasses/next';
 // Create middleware with edge-optimized config
 export default createSpyglassesMiddleware({
   apiKey: process.env.SPYGLASSES_API_KEY,
-  // Parse patterns from build-time environment variables
-  patterns: process.env.SPYGLASSES_PATTERNS ? JSON.parse(process.env.SPYGLASSES_PATTERNS) : undefined,
-  aiReferrers: process.env.SPYGLASSES_AI_REFERRERS ? JSON.parse(process.env.SPYGLASSES_AI_REFERRERS) : undefined
+  debug: false // Keep debug off in production edge functions
 });
 
 // Export runtime config for Edge
@@ -300,28 +236,87 @@ export const config = {
 };
 ```
 
+## Cache Configuration
+
+### Default Caching
+
+By default, patterns are cached for 24 hours (86400 seconds):
+
+```typescript
+export default createSpyglassesMiddleware({
+  apiKey: process.env.SPYGLASSES_API_KEY,
+  // Uses SPYGLASSES_CACHE_TTL environment variable or 86400 default
+});
+```
+
+### Custom Cache Duration
+
+Set a custom cache duration via environment variable:
+
+```bash
+# Cache for 1 hour
+SPYGLASSES_CACHE_TTL=3600
+
+# Cache for 30 minutes  
+SPYGLASSES_CACHE_TTL=1800
+
+# Cache for 1 week
+SPYGLASSES_CACHE_TTL=604800
+```
+
+### How Caching Works
+
+1. **First Request**: Middleware fetches patterns from Spyglasses API
+2. **Next.js Caching**: Response is automatically cached by Next.js fetch
+3. **Subsequent Requests**: Use cached patterns (no API calls)
+4. **Cache Expiry**: After TTL expires, next request triggers refresh
+5. **Background Refresh**: New patterns fetched in background, cache updated
+
 ## Troubleshooting
 
-Common issues and solutions:
+### Common Issues
 
-### API Key Not Found
-- Verify environment variable is set
-- Check for typos in variable name
-- Ensure deployment includes environment variables
+**API Key Not Found**
+- Verify `SPYGLASSES_API_KEY` is set in your deployment environment
+- Check for typos in the environment variable name
+- Ensure the environment variable is available at runtime
 
-### Middleware Not Running
-- Confirm `middleware.ts` is in the correct location
-- Check matcher configuration
-- Verify Next.js version (12.0.0 or higher required)
+**Middleware Not Running**
+- Confirm `middleware.ts` is in your project root (same level as `app/` or `pages/`)
+- Check your matcher configuration
+- Verify Next.js version is 12.0.0 or higher
 
-### Pattern Loading Issues
-- Check that `next.config.js` is properly configured
-- Verify API key has access to patterns API
-- Add error handling in your pattern loading function
+**Pattern Loading Issues**
+- Check that your API key has access to the patterns API
+- Enable debug mode to see error messages: `debug: true`
+- Verify network connectivity from your deployment environment
 
-### Performance Issues
-- Enable debug mode to check for errors
-- Use build-time pattern loading for serverless environments
-- Optimize your middleware matcher configuration
+**Performance Issues**
+- Monitor cache hit rates in debug mode
+- Consider adjusting `SPYGLASSES_CACHE_TTL` based on your traffic patterns
+- Optimize your middleware matcher to exclude unnecessary paths
 
-Need help? Contact support@spyglasses.io 
+### Debug Mode
+
+Enable debug logging to troubleshoot issues:
+
+```typescript
+export default createSpyglassesMiddleware({
+  apiKey: process.env.SPYGLASSES_API_KEY,
+  debug: true // Enable debug logging
+});
+```
+
+This will log:
+- Pattern sync attempts and results
+- Cache hits and misses
+- Detection results
+- Error messages
+
+### Getting Help
+
+Need assistance? Contact support@spyglasses.io with:
+- Your deployment platform
+- Debug logs (if available)
+- Configuration details
+- Description of the issue 

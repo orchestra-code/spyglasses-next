@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { BotPattern, AiReferrerInfo } from '@spyglasses/sdk';
 
 /**
  * Configuration options for the Spyglasses middleware
@@ -16,18 +15,6 @@ export interface SpyglassesConfig {
    * Defaults to false
    */
   debug?: boolean;
-
-  /**
-   * Custom bot patterns to use (overrides default patterns)
-   * Provide these at build-time for optimal performance
-   */
-  patterns?: BotPattern[];
-
-  /**
-   * Custom AI referrer patterns to use (overrides default patterns)
-   * Provide these at build-time for optimal performance
-   */
-  aiReferrers?: AiReferrerInfo[];
 
   /**
    * Whether to block AI model trainers (GPTBot, Claude, etc.)
