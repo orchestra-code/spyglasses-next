@@ -5,28 +5,8 @@ import { SpyglassesConfig, SpyglassesMiddleware } from './types';
 const COLLECTOR_ENDPOINT = 'https://www.spyglasses.io/api/collect';
 const API_KEY = process.env.SPYGLASSES_API_KEY;
 
-// Module-level instance cache
-let spyglassesInstance: Spyglasses | null = null;
+// Module-level pattern sync cache (shared across instances)
 let patternSyncPromise: Promise<ApiPatternResponse | string> | null = null;
-
-/**
- * Get or create a Spyglasses instance with the given configuration
- * Ensures we reuse the same instance for performance
- */
-function getSpyglassesInstance(config: SpyglassesConfig): Spyglasses {
-  if (!spyglassesInstance) {
-    spyglassesInstance = new Spyglasses({
-      apiKey: config.apiKey || API_KEY,
-      debug: config.debug || false,
-      blockAiModelTrainers: config.blockAiModelTrainers || false,
-      customBlocks: config.customBlocks || [],
-      customAllows: config.customAllows || [],
-      collectEndpoint: COLLECTOR_ENDPOINT
-    });
-  }
-  
-  return spyglassesInstance;
-}
 
 /**
  * Sync and cache patterns
@@ -87,8 +67,16 @@ function shouldExcludePath(path: string, excludePatterns: (string | RegExp)[] = 
  * @returns A middleware function
  */
 export function createSpyglassesMiddleware(config: SpyglassesConfig): SpyglassesMiddleware {
-  // Create or get a Spyglasses instance
-  const spyglasses = getSpyglassesInstance(config);
+  // Create a new Spyglasses instance for each middleware with its specific config
+  const spyglasses = new Spyglasses({
+    apiKey: config.apiKey || API_KEY,
+    debug: config.debug || false,
+    blockAiModelTrainers: config.blockAiModelTrainers || false,
+    customBlocks: config.customBlocks || [],
+    customAllows: config.customAllows || [],
+    collectEndpoint: COLLECTOR_ENDPOINT
+  });
+  
   const excludePaths = config.excludePaths || [];
   
   // Always try to sync patterns if we have an API key (using Next.js caching)
