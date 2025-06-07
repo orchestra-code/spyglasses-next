@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { ApiPatternResponse, Spyglasses } from '@spyglasses/sdk';
 import { SpyglassesConfig, SpyglassesMiddleware } from './types';
 
-const COLLECTOR_ENDPOINT = 'https://www.spyglasses.io/api/collect';
+const COLLECTOR_ENDPOINT = process.env.SPYGLASSES_COLLECTOR_ENDPOINT || 'https://www.spyglasses.io/api/collect';
 const API_KEY = process.env.SPYGLASSES_API_KEY;
 
 // Module-level pattern sync cache (shared across instances)

@@ -77,6 +77,7 @@ See the [examples directory](./examples) for more details.
 |----------|-------------|---------|
 | `SPYGLASSES_API_KEY` | Your Spyglasses API key | Required |
 | `SPYGLASSES_CACHE_TTL` | Cache duration in seconds | `86400` (24 hours) |
+| `SPYGLASSES_COLLECTOR_ENDPOINT` | Override the default endpoint | Optional |
 
 ## Configuration Options
 
@@ -90,6 +91,7 @@ The middleware accepts the following configuration options:
 | `customBlocks` | `string[]` | `[]` | Custom patterns to block |
 | `customAllows` | `string[]` | `[]` | Custom patterns to allow (overrides blocks) |
 | `excludePaths` | `(string \| RegExp)[]` | Default exclusions | Paths to exclude from monitoring |
+| `collectEndpoint` | `string` | `process.env.SPYGLASSES_COLLECTOR_ENDPOINT` | Override the default endpoint |
 
 ## Advanced Usage
 
