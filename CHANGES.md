@@ -1,3 +1,11 @@
+# Changes in v0.5.2
+
+### Improved Debug Logging
+- Enhanced debug logging throughout the middleware with detailed information
+- Added `SPYGLASSES_DEBUG` environment variable for easier debug configuration
+- Debug mode now logs configuration details, pattern sync status, detection results, and blocking decisions
+- More consistent error reporting with detailed context
+
 # Changes in v0.3.0
 
 This release includes significant improvements to the Spyglasses Next.js middleware, focusing on performance, flexibility, and blocking capabilities.

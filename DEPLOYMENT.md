@@ -25,6 +25,7 @@ pnpm add @spyglasses/next
    - Go to Project Settings > Environment Variables
    - Add `SPYGLASSES_API_KEY` with your API key
    - Optionally add `SPYGLASSES_CACHE_TTL` (defaults to 86400 seconds / 24 hours)
+   - Optionally add `SPYGLASSES_DEBUG=true` to enable debug logging
    - Deploy to apply changes
 
 3. Create your middleware:
@@ -34,7 +35,7 @@ import { createSpyglassesMiddleware } from '@spyglasses/next';
 
 export default createSpyglassesMiddleware({
   apiKey: process.env.SPYGLASSES_API_KEY,
-  debug: process.env.NODE_ENV !== 'production'
+  debug: process.env.SPYGLASSES_DEBUG === 'true'
 });
 
 export const config = {
@@ -53,6 +54,7 @@ npm install @spyglasses/next
    - Go to Site Settings > Build & Deploy > Environment
    - Add `SPYGLASSES_API_KEY` with your API key
    - Optionally add `SPYGLASSES_CACHE_TTL`
+   - Optionally add `SPYGLASSES_DEBUG=true` to enable debug logging
    - Trigger a new deploy
 
 3. The middleware will automatically handle pattern caching using Next.js built-in mechanisms.
@@ -68,6 +70,7 @@ npm install @spyglasses/next
    - Go to App Settings > Environment Variables
    - Add `SPYGLASSES_API_KEY` with your API key
    - Optionally add `SPYGLASSES_CACHE_TTL`
+   - Optionally add `SPYGLASSES_DEBUG=true` to enable debug logging
    - Redeploy your application
 
 ### Docker
@@ -76,6 +79,7 @@ npm install @spyglasses/next
 ```dockerfile
 ENV SPYGLASSES_API_KEY=your_api_key_here
 ENV SPYGLASSES_CACHE_TTL=86400
+ENV SPYGLASSES_DEBUG=false
 ```
 
 Or use docker-compose:
@@ -85,6 +89,7 @@ services:
     environment:
       - SPYGLASSES_API_KEY=your_api_key_here
       - SPYGLASSES_CACHE_TTL=86400
+      - SPYGLASSES_DEBUG=false
 ```
 
 ## Environment Variables
@@ -93,6 +98,7 @@ services:
 |----------|-------------|---------|----------|
 | `SPYGLASSES_API_KEY` | Your Spyglasses API key | None | Yes |
 | `SPYGLASSES_CACHE_TTL` | Cache duration in seconds | `86400` (24 hours) | No |
+| `SPYGLASSES_DEBUG` | Enable debug logging (`true`/`false`) | `false` | No |
 
 ## Blocking Configuration
 
@@ -104,6 +110,7 @@ import { createSpyglassesMiddleware } from '@spyglasses/next';
 
 export default createSpyglassesMiddleware({
   apiKey: process.env.SPYGLASSES_API_KEY,
+  debug: process.env.SPYGLASSES_DEBUG === 'true',
   
   // Block AI model trainers (GPTBot, Claude-Bot, etc.)
   blockAiModelTrainers: true,
@@ -147,6 +154,7 @@ import { createSpyglassesMiddleware } from '@spyglasses/next'
 // Create the Spyglasses middleware
 const spyglassesMiddleware = createSpyglassesMiddleware({
   apiKey: process.env.SPYGLASSES_API_KEY,
+  debug: process.env.SPYGLASSES_DEBUG === 'true',
   blockAiModelTrainers: true,
   customBlocks: ['category:Scraper'],
   customAllows: ['pattern:Googlebot']
@@ -195,6 +203,7 @@ import { createSpyglassesMiddleware } from '@spyglasses/next'
 
 const spyglassesMiddleware = createSpyglassesMiddleware({
   apiKey: process.env.SPYGLASSES_API_KEY,
+  debug: process.env.SPYGLASSES_DEBUG === 'true',
   blockAiModelTrainers: true
 });
 
@@ -226,7 +235,7 @@ import { createSpyglassesMiddleware } from '@spyglasses/next';
 // Create middleware with edge-optimized config
 export default createSpyglassesMiddleware({
   apiKey: process.env.SPYGLASSES_API_KEY,
-  debug: false // Keep debug off in production edge functions
+  debug: process.env.SPYGLASSES_DEBUG === 'true' // Can be enabled in edge functions but may impact performance
 });
 
 // Export runtime config for Edge
@@ -303,15 +312,26 @@ Enable debug logging to troubleshoot issues:
 ```typescript
 export default createSpyglassesMiddleware({
   apiKey: process.env.SPYGLASSES_API_KEY,
-  debug: true // Enable debug logging
+  debug: true // Enable debug logging explicitly
 });
 ```
 
-This will log:
+Or use the environment variable:
+
+```bash
+SPYGLASSES_DEBUG=true
+```
+
+Debug mode logs the following information:
+- Configuration details on middleware startup
 - Pattern sync attempts and results
-- Cache hits and misses
-- Detection results
-- Error messages
+- Request processing for monitored paths
+- Detection results for bots and AI referrers
+- Blocking decisions and reasons
+- API collection attempts and errors
+- Path exclusion decisions
+
+**Note:** Debug mode can be verbose in high-traffic applications. Use sparingly in production.
 
 ### Getting Help
 

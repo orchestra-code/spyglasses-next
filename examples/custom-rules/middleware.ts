@@ -17,8 +17,8 @@ export default createSpyglassesMiddleware({
   // Get API key from environment variables
   apiKey: process.env.SPYGLASSES_API_KEY,
   
-  // Enable debug logging in development
-  debug: process.env.NODE_ENV !== 'production',
+  // Enable debug logging with SPYGLASSES_DEBUG environment variable
+  debug: process.env.SPYGLASSES_DEBUG === 'true',
   
   // Block AI model trainers globally
   blockAiModelTrainers: true,

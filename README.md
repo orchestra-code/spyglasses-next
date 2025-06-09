@@ -33,7 +33,7 @@ import { createSpyglassesMiddleware } from '@spyglasses/next';
 
 export default createSpyglassesMiddleware({
   apiKey: process.env.SPYGLASSES_API_KEY,
-  debug: process.env.NODE_ENV !== 'production'
+  debug: process.env.SPYGLASSES_DEBUG === 'true'
 });
 
 export const config = {
@@ -46,6 +46,7 @@ export const config = {
 ```
 SPYGLASSES_API_KEY=your_api_key_here
 SPYGLASSES_CACHE_TTL=86400
+SPYGLASSES_DEBUG=true
 ```
 
 That's it! The middleware will now detect and log AI bots and referrers visiting your site.
@@ -77,6 +78,7 @@ See the [examples directory](./examples) for more details.
 |----------|-------------|---------|
 | `SPYGLASSES_API_KEY` | Your Spyglasses API key | Required |
 | `SPYGLASSES_CACHE_TTL` | Cache duration in seconds | `86400` (24 hours) |
+| `SPYGLASSES_DEBUG` | Enable debug logging (`true`/`false`) | `false` |
 | `SPYGLASSES_COLLECTOR_ENDPOINT` | Override the default endpoint | Optional |
 
 ## Configuration Options
@@ -100,6 +102,7 @@ The middleware accepts the following configuration options:
 ```typescript
 export default createSpyglassesMiddleware({
   apiKey: process.env.SPYGLASSES_API_KEY,
+  debug: process.env.SPYGLASSES_DEBUG === 'true',
   blockAiModelTrainers: true, // Blocks GPTBot, Claude-Bot, etc.
 });
 ```
@@ -109,6 +112,7 @@ export default createSpyglassesMiddleware({
 ```typescript
 export default createSpyglassesMiddleware({
   apiKey: process.env.SPYGLASSES_API_KEY,
+  debug: process.env.SPYGLASSES_DEBUG === 'true',
   customBlocks: [
     'category:Scraper',        // Block all scrapers
     'pattern:SomeBot',         // Block specific bot
@@ -124,6 +128,7 @@ export default createSpyglassesMiddleware({
 ```typescript
 export default createSpyglassesMiddleware({
   apiKey: process.env.SPYGLASSES_API_KEY,
+  debug: process.env.SPYGLASSES_DEBUG === 'true',
   excludePaths: [
     '/health',                 // Exclude health check
     /^\/admin/,               // Exclude admin paths (regex)
