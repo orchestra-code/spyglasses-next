@@ -39,6 +39,26 @@ export interface SpyglassesConfig {
    * Use glob patterns or regular expressions
    */
   excludePaths?: (string | RegExp)[];
+
+  /**
+   * Logging performance options
+   */
+  logging?: {
+    /**
+     * Timeout for logging blocked requests (ms)
+     * Set to 0 to disable timeout, null to skip logging entirely
+     * Default: 2000ms
+     */
+    blockingTimeout?: number | null;
+    
+    /**
+     * Whether to await logging for blocked requests
+     * false = fire-and-forget (better performance)
+     * true = ensure logging completes (better reliability)
+     * Default: true
+     */
+    awaitBlockedLogging?: boolean;
+  };
 }
 
 /**

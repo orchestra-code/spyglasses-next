@@ -161,23 +161,43 @@ export function createSpyglassesMiddleware(config: SpyglassesConfig): Spyglasses
           console.log(`Spyglasses: Blocking request from ${detectionResult.sourceType}: ${detectionResult.matchedPattern}`);
         }
         
-        // Log the blocked visit first
-        await spyglasses.logRequest(detectionResult, {
-          url: request.url,
-          method: request.method,
-          path: url.pathname,
-          query: url.search,
-          userAgent,
-          referrer,
-          ip: request.ip || '',
-          headers: Object.fromEntries(request.headers),
-          responseStatus: 403
-        }).catch((error) => {
-          // Ignore errors in serverless environments
-          if (debugMode) {
-            console.error('Spyglasses: Error logging blocked visit:', error);
+        // For blocked requests, we can afford a small delay to ensure logging
+        // but we'll set a reasonable timeout to avoid hanging
+        const logBlockedRequest = async () => {
+          try {
+            // Set a timeout for logging to avoid hanging the response
+            const timeoutPromise = new Promise((_, reject) => 
+              setTimeout(() => reject(new Error('Logging timeout')), 2000)
+            );
+            
+            await Promise.race([
+              spyglasses.logRequest(detectionResult, {
+                url: request.url,
+                method: request.method,
+                path: url.pathname,
+                query: url.search,
+                userAgent,
+                referrer,
+                ip: request.ip || '',
+                headers: Object.fromEntries(request.headers),
+                responseStatus: 403
+              }),
+              timeoutPromise
+            ]);
+            
+            if (debugMode) {
+              console.log(`Spyglasses: ✅ Successfully logged blocked ${detectionResult.sourceType} visit`);
+            }
+          } catch (error) {
+            if (debugMode) {
+              console.error(`Spyglasses: ❌ Error logging blocked ${detectionResult.sourceType} visit:`, error);
+            }
+            // Continue with blocking even if logging fails
           }
-        });
+        };
+        
+        // Await the logging but with timeout protection
+        await logBlockedRequest();
         
         // Return 403 Forbidden
         return new NextResponse('Access Denied', { 
@@ -192,8 +212,9 @@ export function createSpyglassesMiddleware(config: SpyglassesConfig): Spyglasses
         console.log(`Spyglasses: Logging ${detectionResult.sourceType} visit: ${detectionResult.matchedPattern}`);
       }
       
-      // Otherwise, just log the visit
-      spyglasses.logRequest(detectionResult, {
+      // For non-blocked requests, use fire-and-forget but with serverless considerations
+      // In serverless environments, we need to be more careful about promises being cut off
+      const logPromise = spyglasses.logRequest(detectionResult, {
         url: request.url,
         method: request.method,
         path: url.pathname,
@@ -203,10 +224,22 @@ export function createSpyglassesMiddleware(config: SpyglassesConfig): Spyglasses
         ip: request.ip || '',
         headers: Object.fromEntries(request.headers),
         responseStatus: 200
-      }).catch((error) => {
-        // Ignore errors in serverless environments
+      });
+      
+      // Handle the promise without awaiting to avoid blocking the response
+      logPromise.then(() => {
         if (debugMode) {
-          console.error('Spyglasses: Error logging visit:', error);
+          console.log(`Spyglasses: ✅ Successfully logged ${detectionResult.sourceType} visit`);
+        }
+      }).catch((error) => {
+        if (debugMode) {
+          console.error(`Spyglasses: ❌ Error logging ${detectionResult.sourceType} visit:`, error);
+          
+          // Additional debugging for AI referrer failures
+          if (detectionResult.sourceType === 'ai_referrer') {
+            console.error('Spyglasses: AI referrer logging failed');
+            console.error('Spyglasses: Detection result was:', detectionResult);
+          }
         }
       });
     }
