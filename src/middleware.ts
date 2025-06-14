@@ -182,7 +182,7 @@ export function createSpyglassesMiddleware(config: SpyglassesConfig): Spyglasses
                 query: url.search,
                 userAgent,
                 referrer,
-                ip: request.ip || '',
+                ip: request.headers.get('x-forwarded-for') || '',
                 headers: Object.fromEntries(request.headers),
                 responseStatus: 403
               }),
@@ -225,7 +225,7 @@ export function createSpyglassesMiddleware(config: SpyglassesConfig): Spyglasses
         query: url.search,
         userAgent,
         referrer,
-        ip: request.ip || '',
+        ip: request.headers.get('x-forwarded-for') || '',
         headers: Object.fromEntries(request.headers),
         responseStatus: 200
       });
