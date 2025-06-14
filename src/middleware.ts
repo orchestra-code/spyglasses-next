@@ -37,6 +37,13 @@ async function syncPatterns(spyglasses: Spyglasses, debug: boolean = false): Pro
           console.warn('Spyglasses: Pattern sync warning:', result);
         } else {
           console.log(`Spyglasses: Successfully synced ${result.patterns?.length || 0} patterns and ${result.aiReferrers?.length || 0} AI referrers`);
+          if (result.propertySettings) {
+            console.log('Spyglasses: Loaded property settings from platform:', {
+              blockAiModelTrainers: result.propertySettings.blockAiModelTrainers,
+              customBlocks: result.propertySettings.customBlocks.length,
+              customAllows: result.propertySettings.customAllows.length
+            });
+          }
         }
       }
     } catch (error) {
@@ -97,9 +104,6 @@ export function createSpyglassesMiddleware(config: SpyglassesConfig): Spyglasses
   const spyglasses = new Spyglasses({
     apiKey: config.apiKey || API_KEY,
     debug: debugMode,
-    blockAiModelTrainers: config.blockAiModelTrainers || false,
-    customBlocks: config.customBlocks || [],
-    customAllows: config.customAllows || [],
     collectEndpoint: COLLECTOR_ENDPOINT
   });
   

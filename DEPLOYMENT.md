@@ -102,40 +102,17 @@ services:
 
 ## Blocking Configuration
 
-You can configure Spyglasses to block specific bots or AI model trainers:
+Blocking rules are managed through the Spyglasses platform web interface rather than in code. To configure blocking:
 
-```typescript
-// middleware.ts
-import { createSpyglassesMiddleware } from '@spyglasses/next';
+1. Log into your Spyglasses dashboard
+2. Navigate to your property
+3. Go to the "Traffic Control" section
+4. Configure your blocking preferences:
+   - **Global AI Model Trainer Blocking**: Block all AI model training bots (GPTBot, Claude-Bot, etc.)
+   - **Custom Block Rules**: Block specific categories, subcategories, bot types, or patterns
+   - **Custom Allow Rules**: Create exceptions to allow specific bots even when they would otherwise be blocked
 
-export default createSpyglassesMiddleware({
-  apiKey: process.env.SPYGLASSES_API_KEY,
-  debug: process.env.SPYGLASSES_DEBUG === 'true',
-  
-  // Block AI model trainers (GPTBot, Claude-Bot, etc.)
-  blockAiModelTrainers: true,
-  
-  // Block specific categories, subcategories, or patterns
-  customBlocks: [
-    'category:Scraper',                    // Block all scrapers
-    'subcategory:AI Agent',               // Block all AI agents
-    'pattern:SomeSpecificBot'             // Block specific bot
-  ],
-  
-  // Allow specific patterns (overrides blocks)
-  customAllows: [
-    'pattern:Googlebot',                  // Always allow Googlebot
-    'pattern:Bingbot'                     // Always allow Bingbot
-  ],
-  
-  // Exclude specific paths from monitoring
-  excludePaths: [
-    '/health',                            // Health checks
-    '/api/webhooks',                      // Webhook endpoints
-    /^\/admin/                           // Admin paths (regex)
-  ]
-});
-```
+The middleware will automatically load and apply these settings when it syncs patterns from the API.
 
 ## Integrating with Existing Middleware
 
@@ -154,10 +131,7 @@ import { createSpyglassesMiddleware } from '@spyglasses/next'
 // Create the Spyglasses middleware
 const spyglassesMiddleware = createSpyglassesMiddleware({
   apiKey: process.env.SPYGLASSES_API_KEY,
-  debug: process.env.SPYGLASSES_DEBUG === 'true',
-  blockAiModelTrainers: true,
-  customBlocks: ['category:Scraper'],
-  customAllows: ['pattern:Googlebot']
+  debug: process.env.SPYGLASSES_DEBUG === 'true'
 });
 
 // Your existing middleware
@@ -203,8 +177,7 @@ import { createSpyglassesMiddleware } from '@spyglasses/next'
 
 const spyglassesMiddleware = createSpyglassesMiddleware({
   apiKey: process.env.SPYGLASSES_API_KEY,
-  debug: process.env.SPYGLASSES_DEBUG === 'true',
-  blockAiModelTrainers: true
+  debug: process.env.SPYGLASSES_DEBUG === 'true'
 });
 
 export async function middleware(request: NextRequest) {
@@ -275,11 +248,11 @@ SPYGLASSES_CACHE_TTL=604800
 
 ### How Caching Works
 
-1. **First Request**: Middleware fetches patterns from Spyglasses API
+1. **First Request**: Middleware fetches patterns and property settings from Spyglasses API
 2. **Next.js Caching**: Response is automatically cached by Next.js fetch
-3. **Subsequent Requests**: Use cached patterns (no API calls)
+3. **Subsequent Requests**: Use cached patterns and settings (no API calls)
 4. **Cache Expiry**: After TTL expires, next request triggers refresh
-5. **Background Refresh**: New patterns fetched in background, cache updated
+5. **Background Refresh**: New patterns and settings fetched in background, cache updated
 
 ## Troubleshooting
 
@@ -325,6 +298,7 @@ SPYGLASSES_DEBUG=true
 Debug mode logs the following information:
 - Configuration details on middleware startup
 - Pattern sync attempts and results
+- Property settings loaded from the platform
 - Request processing for monitored paths
 - Detection results for bots and AI referrers
 - Blocking decisions and reasons

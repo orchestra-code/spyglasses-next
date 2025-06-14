@@ -5,7 +5,6 @@ This directory contains examples showing how to use Spyglasses with Next.js in s
 ## Examples
 
 - [`basic/`](./basic/) - Minimal example without API key
-- [`custom-rules/`](./custom-rules/) - Shows configuring custom block and allow lists
 - [`middleware-chaining/`](./middleware-chaining/) - Shows how to chain with existing middleware
 
 ## Environment Variables

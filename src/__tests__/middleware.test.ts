@@ -55,7 +55,12 @@ describe('Spyglasses Middleware', () => {
     mockSyncPatterns.mockResolvedValue({
       version: '1.0.0',
       patterns: [],
-      aiReferrers: []
+      aiReferrers: [],
+      propertySettings: {
+        blockAiModelTrainers: false,
+        customBlocks: [],
+        customAllows: []
+      }
     });
     mockLogRequest.mockResolvedValue({});
     
@@ -85,10 +90,7 @@ describe('Spyglasses Middleware', () => {
     it('creates middleware with provided config', async () => {
       const config = {
         apiKey: 'custom-key',
-        debug: true,
-        blockAiModelTrainers: true,
-        customBlocks: ['category:Scraper'],
-        customAllows: ['pattern:Googlebot']
+        debug: true
       };
       
       const middleware = createSpyglassesMiddleware(config);

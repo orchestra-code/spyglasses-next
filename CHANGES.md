@@ -1,3 +1,38 @@
+# Changes in v0.6.0
+
+### Platform-managed Blocking Rules
+- **BREAKING CHANGE**: Removed `blockAiModelTrainers`, `customBlocks`, and `customAllows` configuration options
+- Blocking rules are now managed through the Spyglasses platform web interface
+- The middleware automatically loads property-specific blocking settings from the API
+- Enhanced debug logging to show loaded property settings from the platform
+- Removed the custom-rules example as it's no longer relevant
+
+### Migration Guide
+If you were using blocking configuration in your middleware:
+
+**Before (v0.5.x):**
+```typescript
+export default createSpyglassesMiddleware({
+  apiKey: process.env.SPYGLASSES_API_KEY,
+  blockAiModelTrainers: true,
+  customBlocks: ['category:Scraper'],
+  customAllows: ['pattern:Googlebot']
+});
+```
+
+**After (v0.6.0):**
+```typescript
+export default createSpyglassesMiddleware({
+  apiKey: process.env.SPYGLASSES_API_KEY
+});
+```
+
+Then configure your blocking rules in the Spyglasses platform:
+1. Log into your dashboard
+2. Navigate to your property
+3. Go to "Traffic Control"
+4. Configure your blocking preferences
+
 # Changes in v0.5.2
 
 ### Improved Debug Logging
