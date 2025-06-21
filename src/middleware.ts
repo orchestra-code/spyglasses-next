@@ -104,7 +104,8 @@ export function createSpyglassesMiddleware(config: SpyglassesConfig): Spyglasses
   const spyglasses = new Spyglasses({
     apiKey: config.apiKey || API_KEY,
     debug: debugMode,
-    collectEndpoint: COLLECTOR_ENDPOINT
+    collectEndpoint: COLLECTOR_ENDPOINT,
+    platformType: config.platformType || 'next.js'
   });
   
   const excludePaths = config.excludePaths || [];

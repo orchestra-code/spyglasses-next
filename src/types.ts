@@ -17,6 +17,12 @@ export interface SpyglassesConfig {
   debug?: boolean;
 
   /**
+   * Platform type identifier
+   * Defaults to 'next.js' but can be overridden
+   */
+  platformType?: string;
+
+  /**
    * Specific paths to exclude from monitoring
    * Use glob patterns or regular expressions
    */
