@@ -3,7 +3,7 @@
 [![npm version](https://badge.fury.io/js/@spyglasses%2Fnext.svg)](https://www.npmjs.com/package/@spyglasses/next)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A middleware for Next.js that detects and optionally blocks AI bots and trackers, while also tracking human visitors coming from AI platforms like ChatGPT, Claude, and Perplexity.
+The Spyglasses middleware for Next.js enables you to detect AI Agents, bots, crawlers, and referrers in your Python web applications. It provides comprehensive [AI SEO](https://www.spyglasses.io), shows you when your site features in ChatGPT, Claude, Perplexity, and other AI assistant chat platforms. It can also prevent your site's content from being used for training AI by blocking the crawlers that scrape your content for training.
 
 ## Key Features
 
