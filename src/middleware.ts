@@ -3,6 +3,7 @@ import { ApiPatternResponse, Spyglasses } from '@spyglasses/sdk';
 import { SpyglassesConfig, SpyglassesMiddleware } from './types';
 
 const COLLECTOR_ENDPOINT = process.env.SPYGLASSES_COLLECTOR_ENDPOINT || 'https://www.spyglasses.io/api/collect';
+const PATTERNS_ENDPOINT = process.env.SPYGLASSES_PATTERNS_ENDPOINT || 'https://www.spyglasses.io/api/patterns';
 const API_KEY = process.env.SPYGLASSES_API_KEY;
 const DEBUG = process.env.SPYGLASSES_DEBUG === 'true';
 
@@ -104,7 +105,8 @@ export function createSpyglassesMiddleware(config: SpyglassesConfig): Spyglasses
   const spyglasses = new Spyglasses({
     apiKey: config.apiKey || API_KEY,
     debug: debugMode,
-    collectEndpoint: COLLECTOR_ENDPOINT,
+    collectEndpoint: config.collectEndpoint || COLLECTOR_ENDPOINT,
+    patternsEndpoint: config.patternsEndpoint || PATTERNS_ENDPOINT,
     platformType: config.platformType || 'next.js'
   });
   

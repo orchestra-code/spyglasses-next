@@ -17,6 +17,20 @@ export interface SpyglassesConfig {
   debug?: boolean;
 
   /**
+   * Custom collector endpoint URL
+   * If not provided, will use SPYGLASSES_COLLECTOR_ENDPOINT environment variable
+   * or default to 'https://www.spyglasses.io/api/collect'
+   */
+  collectEndpoint?: string;
+
+  /**
+   * Custom patterns endpoint URL  
+   * If not provided, will use SPYGLASSES_PATTERNS_ENDPOINT environment variable
+   * or default to 'https://www.spyglasses.io/api/patterns'
+   */
+  patternsEndpoint?: string;
+
+  /**
    * Platform type identifier
    * Defaults to 'next.js' but can be overridden
    */

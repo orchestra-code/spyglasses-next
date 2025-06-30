@@ -3,7 +3,7 @@
 [![npm version](https://badge.fury.io/js/@spyglasses%2Fnext.svg)](https://www.npmjs.com/package/@spyglasses/next)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-The Spyglasses middleware for Next.js enables you to detect AI Agents, bots, crawlers, and referrers in your Python web applications. It provides comprehensive [AI SEO](https://www.spyglasses.io), shows you when your site features in ChatGPT, Claude, Perplexity, and other AI assistant chat platforms. It can also prevent your site's content from being used for training AI by blocking the crawlers that scrape your content for training.
+The Spyglasses middleware for Next.js enables you to detect AI Agents, bots, crawlers, and referrers in your Next.js web applications. It provides comprehensive [AI SEO](https://www.spyglasses.io), shows you when your site features in ChatGPT, Claude, Perplexity, and other AI assistant chat platforms. It can also prevent your site's content from being used for training AI by blocking the crawlers that scrape your content for training.
 
 ## Key Features
 
@@ -92,7 +92,8 @@ See the [examples directory](./examples) for more details.
 | `SPYGLASSES_API_KEY` | Your Spyglasses API key | Required |
 | `SPYGLASSES_CACHE_TTL` | Cache duration in seconds | `86400` (24 hours) |
 | `SPYGLASSES_DEBUG` | Enable debug logging (`true`/`false`) | `false` |
-| `SPYGLASSES_COLLECTOR_ENDPOINT` | Override the default endpoint | Optional |
+| `SPYGLASSES_COLLECTOR_ENDPOINT` | Override the default collector endpoint | Optional |
+| `SPYGLASSES_PATTERNS_ENDPOINT` | Override the default patterns endpoint | Optional |
 
 ## Configuration Options
 
@@ -103,7 +104,8 @@ The middleware accepts the following configuration options:
 | `apiKey` | `string` | `process.env.SPYGLASSES_API_KEY` | Your Spyglasses API key |
 | `debug` | `boolean` | `false` | Enable debug logging |
 | `excludePaths` | `(string \| RegExp)[]` | Default exclusions | Paths to exclude from monitoring |
-| `collectEndpoint` | `string` | `process.env.SPYGLASSES_COLLECTOR_ENDPOINT` | Override the default endpoint |
+| `collectEndpoint` | `string` | `process.env.SPYGLASSES_COLLECTOR_ENDPOINT` | Override the default collector endpoint |
+| `patternsEndpoint` | `string` | `process.env.SPYGLASSES_PATTERNS_ENDPOINT` | Override the default patterns endpoint |
 
 ## Advanced Usage
 
@@ -118,6 +120,27 @@ export default createSpyglassesMiddleware({
     /^\/admin/,               // Exclude admin paths (regex)
   ],
 });
+```
+
+### Custom Endpoints for Development
+
+For testing against development or staging environments:
+
+```typescript
+export default createSpyglassesMiddleware({
+  apiKey: process.env.SPYGLASSES_API_KEY,
+  collectEndpoint: 'https://dev.spyglasses.io/api/collect',
+  patternsEndpoint: 'https://dev.spyglasses.io/api/patterns',
+  debug: true,
+});
+```
+
+Or using environment variables:
+
+```bash
+# .env.local
+SPYGLASSES_COLLECTOR_ENDPOINT=https://dev.spyglasses.io/api/collect
+SPYGLASSES_PATTERNS_ENDPOINT=https://dev.spyglasses.io/api/patterns
 ```
 
 ## License
